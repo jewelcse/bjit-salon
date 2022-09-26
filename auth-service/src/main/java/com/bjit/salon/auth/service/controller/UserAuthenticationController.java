@@ -45,7 +45,7 @@ public class UserAuthenticationController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(LoginResponseDto.builder()
+        return ResponseEntity.ok( LoginResponseDto.builder()
                         .token(jwt)
                         .username(userDetails.getUsername())
                         .email(userDetails.getEmail())
