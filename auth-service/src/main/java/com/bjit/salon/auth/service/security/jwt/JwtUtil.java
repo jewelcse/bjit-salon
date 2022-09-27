@@ -7,9 +7,12 @@ import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.SignatureException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,15 +29,27 @@ public class JwtUtil {
 
         UserDetailsImpl userDetails =(UserDetailsImpl)authentication.getPrincipal();
 
-        Map<String,Object> claims = new HashMap<String,Object>();
-        claims.put("roles",userDetails.getAuthorities());
+        Map<String,Object> claims = new HashMap<>();
+
+        Collection<? extends GrantedAuthority> roles = userDetails.getAuthorities();
+
+        if (roles.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            claims.put("isAdmin", true);
+        }
+        if (roles.contains(new SimpleGrantedAuthority("ROLE_USER"))) {
+            claims.put("isUser", true);
+        }
+        if (roles.contains(new SimpleGrantedAuthority("ROLE_STAFF"))) {
+            claims.put("isStaff", true);
+        }
+//        claims.put("roles",userDetails.getAuthorities());
 
         return Jwts
                 .builder()
                 .setSubject(userDetails.getUsername())
                 .addClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + TOKEN_EXPIRATION_TIME))
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, APPLICATION_SECRET_KEY)
                 .compact();
 

@@ -23,6 +23,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.bjit.salon.auth.service.util.ConstraintsUtil.APPLICATION_PUBLIC_URL;
+
+
 @AllArgsConstructor
 @Configuration
 @EnableWebSecurity
@@ -30,6 +33,7 @@ import java.util.List;
         prePostEnabled = true,
         securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
 
     private final UserDetailsServiceImpl userDetailsService;
 
@@ -45,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .antMatchers(  "/api/v1/sign-in").permitAll()
+                .antMatchers(APPLICATION_PUBLIC_URL).permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

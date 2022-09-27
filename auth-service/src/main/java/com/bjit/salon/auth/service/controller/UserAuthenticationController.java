@@ -2,11 +2,13 @@ package com.bjit.salon.auth.service.controller;
 
 
 import com.bjit.salon.auth.service.dto.request.UserLoginDto;
+import com.bjit.salon.auth.service.dto.request.UserRegisterDto;
 import com.bjit.salon.auth.service.dto.response.LoginResponseDto;
 import com.bjit.salon.auth.service.security.jwt.JwtUtil;
 import com.bjit.salon.auth.service.service.UserService;
 import com.bjit.salon.auth.service.serviceImpl.UserDetailsImpl;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,9 +49,21 @@ public class UserAuthenticationController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok( LoginResponseDto.builder()
                         .token(jwt)
+                        .type("Bearer")
                         .username(userDetails.getUsername())
                         .email(userDetails.getEmail())
                         .roles(roles)
                 .build());
     }
+
+    @PostMapping("/sign-up")
+    public ResponseEntity<?> registerAccount(@Valid @RequestBody UserRegisterDto registerDto) {
+        userService.createUserAccount(registerDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Register new account success");
+    }
+
+
+
+
+
 }

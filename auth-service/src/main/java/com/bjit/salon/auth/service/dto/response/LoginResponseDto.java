@@ -1,14 +1,13 @@
 package com.bjit.salon.auth.service.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Setter
+@Getter
 public class LoginResponseDto {
 
     private String token;

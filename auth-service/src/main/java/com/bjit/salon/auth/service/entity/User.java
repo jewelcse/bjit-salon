@@ -20,6 +20,8 @@ import java.util.Set;
         @UniqueConstraint(columnNames = "username"),
         @UniqueConstraint(columnNames = "email")
 })
+
+@Builder
 public class User {
 
     @Id
@@ -28,6 +30,12 @@ public class User {
     @NotBlank
     @Size(max = 20)
     private String username;
+    @NotBlank
+    @Size(max = 20)
+    private String firstName;
+    @NotBlank
+    @Size(max = 20)
+    private String lastName;
     @NotBlank
     @Size(max = 50)
     @Email
