@@ -4,4 +4,7 @@ import com.bjit.salon.auth.service.dto.request.UserRegisterDto;
 
 public interface UserService {
     void createUserAccount(UserRegisterDto registerDto);
+
+    boolean activateDeactivateUserAccount(long id);
+
 }

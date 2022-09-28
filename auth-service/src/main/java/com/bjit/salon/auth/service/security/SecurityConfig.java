@@ -23,7 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.bjit.salon.auth.service.util.ConstraintsUtil.APPLICATION_PUBLIC_URL;
+import static com.bjit.salon.auth.service.util.ConstraintsUtil.*;
 
 
 @AllArgsConstructor
@@ -48,8 +48,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .csrf().disable()
-                .authorizeHttpRequests()
+                .authorizeRequests()
                 .antMatchers(APPLICATION_PUBLIC_URL).permitAll()
+                .antMatchers(APPLICATION_SUPER_ADMIN_ACCESSIBLE_URL).hasRole("SUPER_ADMIN")
+                .antMatchers(APPLICATION_ADMIN_ACCESSIBLE_URL).hasRole("ADMIN")
+                .antMatchers(APPLICATION_STAFF_ACCESSIBLE_URL).hasRole("STAFF")
+                .antMatchers(APPLICATION_USER_ACCESSIBLE_URL).hasRole("USER")
                 .anyRequest()
                 .authenticated()
                 .and()
