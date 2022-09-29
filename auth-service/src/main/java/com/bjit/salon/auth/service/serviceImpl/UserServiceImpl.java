@@ -57,6 +57,12 @@ public class UserServiceImpl implements UserService {
                             .orElseThrow(() -> new RoleNotFoundException(ERole.ROLE_ADMIN + " doesn't exist!"));
                     roles.add(adminRole);
                     break;
+
+                case "ROLE_SUPER_ADMIN":
+                    Role superAdminRole = roleRepository.findByName(ERole.ROLE_SUPER_ADMIN)
+                            .orElseThrow(() -> new RoleNotFoundException(ERole.ROLE_SUPER_ADMIN + " doesn't exist!"));
+                    roles.add(superAdminRole);
+                    break;
                 default:
                     Role defaultRole = roleRepository.findByName(ERole.ROLE_USER)
                             .orElseThrow(() -> new RoleNotFoundException(ERole.ROLE_USER + " doesn't exist!"));
