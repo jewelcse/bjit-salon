@@ -5,9 +5,9 @@ import com.bjit.salon.auth.service.dto.request.UserRegisterDto;
 import com.bjit.salon.auth.service.entity.ERole;
 import com.bjit.salon.auth.service.entity.Role;
 import com.bjit.salon.auth.service.entity.User;
-import com.bjit.salon.auth.service.exceptions.RoleNotFoundException;
-import com.bjit.salon.auth.service.exceptions.UserEmailAlreadyTakenException;
-import com.bjit.salon.auth.service.exceptions.UserNotFoundException;
+import com.bjit.salon.auth.service.exception.RoleNotFoundException;
+import com.bjit.salon.auth.service.exception.UserEmailAlreadyTakenException;
+import com.bjit.salon.auth.service.exception.UserNotFoundException;
 import com.bjit.salon.auth.service.repository.RoleRepository;
 import com.bjit.salon.auth.service.repository.UserRepository;
 import com.bjit.salon.auth.service.service.UserService;
@@ -56,6 +56,12 @@ public class UserServiceImpl implements UserService {
                     Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                             .orElseThrow(() -> new RoleNotFoundException(ERole.ROLE_ADMIN + " doesn't exist!"));
                     roles.add(adminRole);
+                    break;
+
+                case "ROLE_SUPER_ADMIN":
+                    Role superAdminRole = roleRepository.findByName(ERole.ROLE_SUPER_ADMIN)
+                            .orElseThrow(() -> new RoleNotFoundException(ERole.ROLE_SUPER_ADMIN + " doesn't exist!"));
+                    roles.add(superAdminRole);
                     break;
                 default:
                     Role defaultRole = roleRepository.findByName(ERole.ROLE_USER)
