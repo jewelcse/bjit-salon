@@ -23,22 +23,9 @@ public class Salon {
     private String name;
     private String description;
     private String address;
+    private long userId;
     private double reviews;
-
-    @OneToOne(cascade = CascadeType.MERGE)
-//    @JoinColumn(name = "salon_id", referencedColumnName = "id")
-    private User user;
-    // todo: salon staffs(users) list: m <-> m
-    @ManyToMany
-    private List<User> staffs;
-    // todo: salon consumers(users) list: m <-> m
-    @ManyToMany
-    private List<User> consumers;
     private Timestamp openingTime;
     private Timestamp closingTime;
     private String contractNumber;
-    // todo: salon services(services) list: m <-> m
-
-
-
 }

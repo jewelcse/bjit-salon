@@ -10,11 +10,11 @@ import java.sql.Timestamp;
 @Setter
 @Getter
 @Builder
-public class SalonCreateDto {
+public class SalonUpdateDto {
+    private long id;
     private String name;
     private String description;
     private String address;
-    private long userId;
     private Timestamp openingTime;
     private Timestamp closingTime;
     private String contractNumber;
