@@ -11,4 +11,6 @@ public interface SalonService {
     void update(SalonUpdateDto salonUpdateDto);
     SalonResponseDto getSalon(Long id);
     List<SalonResponseDto> getAllSalon();
+
+    List<SalonResponseDto> getSalonsByQuery(String str);
 }

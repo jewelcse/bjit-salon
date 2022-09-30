@@ -43,4 +43,9 @@ public class SalonController {
         return ResponseEntity.ok(salonService.getAllSalon());
     }
 
+    @GetMapping("/salons/search")
+    public ResponseEntity<List<SalonResponseDto>> search(@RequestParam("q") String str){
+        return ResponseEntity.ok(salonService.getSalonsByQuery(str));
+    }
+
 }

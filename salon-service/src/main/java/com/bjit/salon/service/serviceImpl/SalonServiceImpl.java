@@ -63,4 +63,9 @@ public class SalonServiceImpl implements SalonService {
     public List<SalonResponseDto> getAllSalon() {
         return salonMapper.toListOfSalonResponseDto(salonRepository.findAll());
     }
+
+    @Override
+    public List<SalonResponseDto> getSalonsByQuery(String str) {
+        return salonMapper.toListOfSalonResponseDto(salonRepository.findByNameContainingIgnoreCase(str));
+    }
 }
