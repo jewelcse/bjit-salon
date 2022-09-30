@@ -1,18 +1,26 @@
 package com.bjit.salon.reservation.service.controller;
 
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.bjit.salon.reservation.service.dto.ReservationCreateDto;
+import com.bjit.salon.reservation.service.service.ReservationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import static com.bjit.salon.reservation.service.util.ConstraintsUtil.RESERVATION_SERVICE_APPLICATION_BASE_API;
 
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping(RESERVATION_SERVICE_APPLICATION_BASE_API)
 public class ReservationController {
 
-    @GetMapping("/hi")
-    public String sayHi(){
-        return "Hi, from reservation service!";
+    private final ReservationService reservationService;
+
+    @PostMapping("/reservations")
+    public ResponseEntity<String> makeReservation(@RequestBody ReservationCreateDto reservationCreateDto) {
+        reservationService.createReservation(reservationCreateDto);
+        return ResponseEntity.ok("Reservation created success");
     }
+
+
 }
