@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface StaffRepository extends JpaRepository<Staff,Long> {
     List<Staff> findAllBySalonId(long id);
+
+    List<Staff> findAllBySalonIdAndIsAvailable(long id, boolean isAvailable);
 }

@@ -20,32 +20,45 @@ public class StaffController {
     private final StaffService staffService;
 
 
-    @PostMapping("/staffs") // add staff
+    @PostMapping("/staffs") // only admin can create a new staff
     public ResponseEntity<String> create(@RequestBody StaffCreateDto staffCreateDto){
         staffService.createNewStaff(staffCreateDto);
         return ResponseEntity.ok("Staff created success");
     }
 
-    @PutMapping("/staffs") // update staff
+    @PutMapping("/staffs") // only staff and admin can update
     public ResponseEntity<String> update(@RequestBody StaffUpdateDto staffUpdateDto){
         staffService.updateStaff(staffUpdateDto);
         return ResponseEntity.ok("Staff updated success");
     }
 
-    @GetMapping("/staffs/{id}")
+    @GetMapping("/staffs/{id}") // only staff and admin can view
     public ResponseEntity<StaffResponseDto> get(@PathVariable long id){
         return ResponseEntity.ok(staffService.getStaff(id));
     }
 
-    @GetMapping("/staffs")
+    @GetMapping("/staffs/{id}/status") // only staff
+    public ResponseEntity<String> updateStatusAvailability(@PathVariable("id") long id){
+        boolean isAvailable = staffService.updateStaffAvailability(id);
+        if (isAvailable){
+            return ResponseEntity.ok("You are now available");
+        }
+        return ResponseEntity.ok("You are unavailable");
+    }
+
+    @GetMapping("/staffs") // only super admin can view
     public ResponseEntity<List<StaffResponseDto>> getAll(){
         return ResponseEntity.ok(staffService.getAllStaff());
     }
 
-    @GetMapping("/staffs/salons/{id}")
+    @GetMapping("/salons/{id}/staffs")
     public ResponseEntity<List<StaffResponseDto>> getSalonStaffs(@PathVariable long id){
         return ResponseEntity.ok(staffService.getListOfStaffBySalon(id));
     }
 
+    @GetMapping("/salons/{id}/available/staffs")
+    public ResponseEntity<List<StaffResponseDto>> getAvailableStaff(@PathVariable long id){
+        return ResponseEntity.ok(staffService.getListOfAvailableStaffBySalon(id));
+    }
 
 }

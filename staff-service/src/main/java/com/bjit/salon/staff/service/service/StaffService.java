@@ -16,4 +16,8 @@ public interface StaffService {
     List<StaffResponseDto> getAllStaff();
 
     List<StaffResponseDto> getListOfStaffBySalon(long id);
+
+    List<StaffResponseDto> getListOfAvailableStaffBySalon(long id);
+
+    boolean updateStaffAvailability(long id);
 }

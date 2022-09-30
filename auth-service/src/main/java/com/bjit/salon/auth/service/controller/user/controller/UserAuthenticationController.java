@@ -1,9 +1,9 @@
-package com.bjit.salon.auth.service.controller;
+package com.bjit.salon.auth.service.controller.user.controller;
 
 
-import com.bjit.salon.auth.service.dto.request.UserLoginDto;
-import com.bjit.salon.auth.service.dto.request.UserRegisterDto;
-import com.bjit.salon.auth.service.dto.response.LoginResponseDto;
+import com.bjit.salon.auth.service.dto.user.service.request.UserLoginDto;
+import com.bjit.salon.auth.service.dto.user.service.request.UserRegisterDto;
+import com.bjit.salon.auth.service.dto.user.service.response.LoginResponseDto;
 import com.bjit.salon.auth.service.security.jwt.JwtUtil;
 import com.bjit.salon.auth.service.service.UserService;
 import com.bjit.salon.auth.service.serviceImpl.UserDetailsImpl;
@@ -15,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
