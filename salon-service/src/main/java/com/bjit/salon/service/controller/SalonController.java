@@ -21,24 +21,24 @@ public class SalonController {
 
     private final SalonService salonService;
 
-    @PostMapping("/salons")
+    @PostMapping("/salons") // admin can create salon
     public ResponseEntity<String> create(@RequestBody SalonCreateDto salonCreateDto){
         salonService.create(salonCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("Salon created success");
     }
 
-    @PutMapping("/salons")
+    @PutMapping("/salons") // admin can update
     public ResponseEntity<String> update(@RequestBody SalonUpdateDto salonUpdateDto){
         salonService.update(salonUpdateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("Salon updated success");
     }
 
-    @GetMapping("/salons/{id}")
+    @GetMapping("/salons/{id}") // admin can view
     public ResponseEntity<SalonResponseDto> get(@PathVariable("id") Long id){
         return ResponseEntity.ok(salonService.getSalon(id));
     }
 
-    @GetMapping("/salons")
+    @GetMapping("/salons") // super admin can view
     public ResponseEntity<List<SalonResponseDto>> getAll(){
         return ResponseEntity.ok(salonService.getAllSalon());
     }

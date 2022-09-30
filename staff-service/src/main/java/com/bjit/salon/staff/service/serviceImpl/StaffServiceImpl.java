@@ -73,4 +73,25 @@ public class StaffServiceImpl implements StaffService {
     public List<StaffResponseDto> getListOfStaffBySalon(long id) {
         return staffMapper.toListOfStaffResponseDto(staffRepository.findAllBySalonId(id));
     }
+
+    @Override
+    public List<StaffResponseDto> getListOfAvailableStaffBySalon(long id) {
+        return staffMapper.toListOfStaffResponseDto(staffRepository.findAllBySalonIdAndIsAvailable(id,true));
+    }
+
+    @Override
+    public boolean updateStaffAvailability(long id) {
+        Optional<Staff> staff = staffRepository.findById(id);
+        if (staff.isEmpty()){
+            throw new StaffNotFoundException("staff not found for id:"+id);
+        }
+        if (staff.get().isAvailable()){
+            staff.get().setAvailable(false);
+            staffRepository.save(staff.get());
+            return false;
+        }
+        staff.get().setAvailable(true);
+        staffRepository.save(staff.get());
+        return true;
+    }
 }

@@ -1,7 +1,7 @@
 package com.bjit.salon.auth.service.serviceImpl;
 
 
-import com.bjit.salon.auth.service.dto.request.UserRegisterDto;
+import com.bjit.salon.auth.service.dto.user.service.request.UserRegisterDto;
 import com.bjit.salon.auth.service.entity.ERole;
 import com.bjit.salon.auth.service.entity.Role;
 import com.bjit.salon.auth.service.entity.User;
