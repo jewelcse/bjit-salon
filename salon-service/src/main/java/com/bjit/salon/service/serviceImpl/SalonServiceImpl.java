@@ -28,7 +28,26 @@ public class SalonServiceImpl implements SalonService {
 
     @Override
     public void update(SalonUpdateDto salonUpdateDto) {
-        salonRepository.save(salonMapper.toSalon(salonUpdateDto));
+        Optional<Salon> salon = salonRepository.findById(salonUpdateDto.getId());
+        if (salon.isEmpty()){
+            throw new SalonNotFoundException("salon not found for id: " + salonUpdateDto.getId());
+        }
+
+        Salon updateSalon = Salon
+                .builder()
+                .id(salon.get().getId())
+                .address(salonUpdateDto.getAddress())
+                .description(salonUpdateDto.getDescription())
+                .name(salonUpdateDto.getName())
+                .openingTime(salonUpdateDto.getOpeningTime())
+                .closingTime(salonUpdateDto.getClosingTime())
+                .reviews(salon.get().getReviews())
+                .userId(salon.get().getUserId())
+                .contractNumber(salonUpdateDto.getContractNumber())
+                .build();
+
+
+        salonRepository.save(updateSalon);
     }
 
     @Override
@@ -43,5 +62,10 @@ public class SalonServiceImpl implements SalonService {
     @Override
     public List<SalonResponseDto> getAllSalon() {
         return salonMapper.toListOfSalonResponseDto(salonRepository.findAll());
+    }
+
+    @Override
+    public List<SalonResponseDto> getSalonsByQuery(String str) {
+        return salonMapper.toListOfSalonResponseDto(salonRepository.findByNameContainingIgnoreCase(str));
     }
 }
