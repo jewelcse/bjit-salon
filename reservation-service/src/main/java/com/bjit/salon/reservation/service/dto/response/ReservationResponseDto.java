@@ -1,11 +1,9 @@
-package com.bjit.salon.reservation.service.dto.request;
-
+package com.bjit.salon.reservation.service.dto.response;
 
 import com.bjit.salon.reservation.service.entity.EPaymentMethod;
+import com.bjit.salon.reservation.service.entity.EWorkingStatus;
 import lombok.*;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -14,12 +12,13 @@ import java.time.LocalTime;
 @Setter
 @Getter
 @ToString
-public class ReservationCreateDto {
+public class ReservationResponseDto {
 
     private long staffId;   // staff id
     private long consumerId; // user id
     private LocalDate reservationDate;
     private LocalTime startTime;
     private LocalTime endTime;
-    private EPaymentMethod paymentMethod; // payment method
+    private EPaymentMethod paymentMethod;
+    private EWorkingStatus workingStatus;
 }

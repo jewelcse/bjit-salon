@@ -3,7 +3,9 @@ package com.bjit.salon.reservation.service.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,9 +22,9 @@ public class Reservation {
     private Long id;
     private long staffId;
     private long consumerId;
-    private Timestamp reservationDate;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private LocalDate reservationDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
     @Column(name = "working_status")
     @Enumerated(EnumType.STRING)
     private EWorkingStatus workingStatus;
