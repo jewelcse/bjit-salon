@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.entity;
 
 public enum EWorkingStatus {
-    STARTING,
+    INITIATED,
     PROCESSING,
     TERMINATED,
     COMPLETED
