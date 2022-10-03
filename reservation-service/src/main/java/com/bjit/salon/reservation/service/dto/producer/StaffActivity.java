@@ -1,4 +1,4 @@
-package com.bjit.salon.reservation.service.dto.response;
+package com.bjit.salon.reservation.service.dto.producer;
 
 import com.bjit.salon.reservation.service.entity.EPaymentMethod;
 import com.bjit.salon.reservation.service.entity.EWorkingStatus;
@@ -15,14 +15,12 @@ import java.time.LocalTime;
 @Setter
 @Getter
 @ToString
-public class ReservationResponseDto {
-
-    private Long id;
+@Builder
+public class StaffActivity {
     private long staffId;
     private long consumerId;
-    private LocalDate reservationDate;
+    private LocalDate workingDate;
     private LocalTime startTime;
     private LocalTime endTime;
     private EWorkingStatus workingStatus;
-    private EPaymentMethod paymentMethod;
 }

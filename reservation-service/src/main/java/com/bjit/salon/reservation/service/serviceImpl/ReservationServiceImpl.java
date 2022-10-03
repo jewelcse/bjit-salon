@@ -1,5 +1,6 @@
 package com.bjit.salon.reservation.service.serviceImpl;
 
+import com.bjit.salon.reservation.service.dto.producer.StaffActivity;
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
 import com.bjit.salon.reservation.service.dto.request.ReservationStartsDto;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
@@ -8,13 +9,16 @@ import com.bjit.salon.reservation.service.entity.Reservation;
 import com.bjit.salon.reservation.service.exception.ReservationNotFoundException;
 import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException;
 import com.bjit.salon.reservation.service.mapper.ReservationMapper;
+import com.bjit.salon.reservation.service.producer.ReservationProducer;
 import com.bjit.salon.reservation.service.repository.ReservationRepository;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +29,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationMapper reservationMapper;
+    private final ReservationProducer reservationProducer;
 
     @Override
     public void createReservation(ReservationCreateDto reservationCreateDto) {
@@ -70,6 +75,19 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.save(currentReservation.get());
 
         // todo: an event will be published to the staff service
+
+        StaffActivity newActivity = StaffActivity
+                .builder()
+                .staffId(currentReservation.get().getStaffId())
+                .consumerId(currentReservation.get().getConsumerId())
+                .startTime(currentReservation.get().getStartTime())
+                .endTime(currentReservation.get().getEndTime())
+                .workingDate(currentReservation.get().getReservationDate())
+                .workingStatus(currentReservation.get().getWorkingStatus())
+                .build();
+
+        reservationProducer.createNewActivity(newActivity);
+
     }
 
     private void saveReservation(ReservationCreateDto reservationCreateDto) {
