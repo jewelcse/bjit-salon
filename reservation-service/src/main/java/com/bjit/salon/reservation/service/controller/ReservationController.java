@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.controller;
 
 
-import com.bjit.salon.reservation.service.dto.ReservationCreateDto;
+import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

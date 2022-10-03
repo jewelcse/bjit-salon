@@ -1,7 +1,7 @@
 package com.bjit.salon.reservation.service.serviceImpl;
 
-import com.bjit.salon.reservation.service.dto.ReservationCreateDto;
-import com.bjit.salon.reservation.service.entity.EPaymentMethod;
+import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
+import com.bjit.salon.reservation.service.entity.EWorkingStatus;
 import com.bjit.salon.reservation.service.entity.Reservation;
 import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException;
 import com.bjit.salon.reservation.service.repository.ReservationRepository;
@@ -20,8 +20,8 @@ public class ReservationServiceImpl implements ReservationService {
         // todo: perform rest call for getting the staff activity
         //  for the particular date for the staff
         // todo: compare the time if it is valid then create new reservation
-        // otherwise, return error message
-        boolean isAvailableAndFree = false;
+        //  otherwise, return error message
+        boolean isAvailableAndFree = true;
 
         if (isAvailableAndFree){
             Reservation newReservation = Reservation.builder()
@@ -30,6 +30,7 @@ public class ReservationServiceImpl implements ReservationService {
                     .reservationDate(reservationCreateDto.getReservationDate())
                     .startTime(reservationCreateDto.getStartTime())
                     .endTime(reservationCreateDto.getEndTime())
+                    .workingStatus(EWorkingStatus.INITIATED)
                     .paymentMethod(reservationCreateDto.getPaymentMethod())
                     .build();
             reservationRepository.save(newReservation);

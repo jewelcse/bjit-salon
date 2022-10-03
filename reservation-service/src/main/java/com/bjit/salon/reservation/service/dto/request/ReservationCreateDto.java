@@ -1,4 +1,4 @@
-package com.bjit.salon.reservation.service.dto;
+package com.bjit.salon.reservation.service.dto.request;
 
 
 import com.bjit.salon.reservation.service.entity.EPaymentMethod;
