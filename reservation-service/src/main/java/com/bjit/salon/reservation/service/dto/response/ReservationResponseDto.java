@@ -4,6 +4,9 @@ import com.bjit.salon.reservation.service.entity.EPaymentMethod;
 import com.bjit.salon.reservation.service.entity.EWorkingStatus;
 import lombok.*;
 
+import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -14,11 +17,12 @@ import java.time.LocalTime;
 @ToString
 public class ReservationResponseDto {
 
-    private long staffId;   // staff id
-    private long consumerId; // user id
+    private Long id;
+    private long staffId;
+    private long consumerId;
     private LocalDate reservationDate;
     private LocalTime startTime;
     private LocalTime endTime;
-    private EPaymentMethod paymentMethod;
     private EWorkingStatus workingStatus;
+    private EPaymentMethod paymentMethod;
 }

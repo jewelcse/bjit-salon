@@ -11,10 +11,12 @@ import com.bjit.salon.reservation.service.mapper.ReservationMapper;
 import com.bjit.salon.reservation.service.repository.ReservationRepository;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,8 @@ public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationMapper reservationMapper;
+
+    private final KafkaTemplate<String,String> KafkaTemplate;
 
     @Override
     public void createReservation(ReservationCreateDto reservationCreateDto) {
