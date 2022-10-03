@@ -4,6 +4,8 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,9 +21,11 @@ public class StaffActivity {
     @Column(name = "id",nullable = false)
     private long id;
 
-    private Timestamp workingDate;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private LocalDate workingDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private long userId;
     private long staffId;
+    @Enumerated(EnumType.STRING)
+    private EWorkingStatus status;
 }
