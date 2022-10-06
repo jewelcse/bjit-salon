@@ -1,6 +1,6 @@
 package com.bjit.salon.reservation.service.serviceImpl;
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivity;
+import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateDto;
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
 import com.bjit.salon.reservation.service.dto.request.ReservationStartsDto;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
@@ -13,13 +13,8 @@ import com.bjit.salon.reservation.service.producer.ReservationProducer;
 import com.bjit.salon.reservation.service.repository.ReservationRepository;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,10 +71,11 @@ public class ReservationServiceImpl implements ReservationService {
 
         // todo: an event will be published to the staff service
 
-        StaffActivity newActivity = StaffActivity
+        StaffActivityCreateDto newActivity = StaffActivityCreateDto
                 .builder()
                 .staffId(currentReservation.get().getStaffId())
                 .consumerId(currentReservation.get().getConsumerId())
+                .reservationId(currentReservation.get().getId())
                 .startTime(currentReservation.get().getStartTime())
                 .endTime(currentReservation.get().getEndTime())
                 .workingDate(currentReservation.get().getReservationDate())

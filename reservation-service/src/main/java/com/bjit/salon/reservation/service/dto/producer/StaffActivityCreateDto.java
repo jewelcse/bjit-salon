@@ -1,12 +1,9 @@
 package com.bjit.salon.reservation.service.dto.producer;
 
-import com.bjit.salon.reservation.service.entity.EPaymentMethod;
 import com.bjit.salon.reservation.service.entity.EWorkingStatus;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -16,9 +13,11 @@ import java.time.LocalTime;
 @Getter
 @ToString
 @Builder
-public class StaffActivity {
-    private long staffId;
-    private long consumerId;
+public class StaffActivityCreateDto implements Serializable {
+    private static final long serialVersionUID = 9178661439383356177L;
+    private Long staffId;
+    private Long consumerId;
+    private Long reservationId;
     private LocalDate workingDate;
     private LocalTime startTime;
     private LocalTime endTime;

@@ -23,6 +23,7 @@ public class StaffActivity {
 
     private long staffId;
     private long consumerId;
+    private long reservationId;
     private LocalDate workingDate;
     private LocalTime startTime;
     private LocalTime endTime;

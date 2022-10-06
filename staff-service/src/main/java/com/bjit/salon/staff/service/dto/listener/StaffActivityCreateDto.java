@@ -3,6 +3,7 @@ package com.bjit.salon.staff.service.dto.listener;
 import com.bjit.salon.staff.service.entity.EWorkingStatus;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -10,12 +11,13 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Setter
 @Getter
-@Builder
 @ToString
-public class NewActivityListenerDto {
-
-    private long staffId;
-    private long consumerId;
+@Builder
+public class StaffActivityCreateDto implements Serializable {
+    private static final long serialVersionUID = 9178661439383356177L;
+    private Long staffId;
+    private Long consumerId;
+    private Long reservationId;
     private LocalDate workingDate;
     private LocalTime startTime;
     private LocalTime endTime;
