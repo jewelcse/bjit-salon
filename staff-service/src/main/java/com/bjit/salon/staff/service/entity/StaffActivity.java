@@ -21,11 +21,11 @@ public class StaffActivity {
     @Column(name = "id",nullable = false)
     private long id;
 
+    private long staffId;
+    private long consumerId;
     private LocalDate workingDate;
     private LocalTime startTime;
     private LocalTime endTime;
-    private long userId;
-    private long staffId;
     @Enumerated(EnumType.STRING)
-    private EWorkingStatus status;
+    private EWorkingStatus workingStatus;
 }
