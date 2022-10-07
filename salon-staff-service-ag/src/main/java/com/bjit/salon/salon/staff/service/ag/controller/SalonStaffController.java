@@ -4,6 +4,7 @@ package com.bjit.salon.salon.staff.service.ag.controller;
 import com.bjit.salon.salon.staff.service.ag.dto.response.SalonDetailsDto;
 import com.bjit.salon.salon.staff.service.ag.dto.response.SalonResponseDto;
 import com.bjit.salon.salon.staff.service.ag.dto.response.StaffResponseDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,21 +28,51 @@ public class SalonStaffController {
 
 
     @GetMapping("/salons/{id}")
-    public ResponseEntity<SalonDetailsDto> getSalons(@PathVariable("id") long id, @RequestParam(required= false, defaultValue = "false") boolean isAvailable){
-        ResponseEntity<SalonResponseDto> salon = restTemplate.getForEntity(SALON_SERVICE_APPLICATION_BASE_URL+"/salons/"+id,SalonResponseDto.class);
-        ResponseEntity<StaffResponseDto[]> staffs = restTemplate.getForEntity(STAFF_SERVICE_APPLICATION_BASE_URL+"/salons/"+id+"/staffs", StaffResponseDto[].class);
+    @CircuitBreaker(name="salon-service",fallbackMethod = "getSalonDetailsFallback")
+    public ResponseEntity<SalonDetailsDto> getSalonDetails(@PathVariable("id") long id, @RequestParam(required= false, defaultValue = "false") boolean isAvailable){
+        SalonResponseDto salon = getSalon(id);
+        StaffResponseDto[] staffs = getStaffs(id);
         if (isAvailable){
-            ResponseEntity<StaffResponseDto[]> availableStaffs = restTemplate.getForEntity(STAFF_SERVICE_APPLICATION_BASE_URL+"/salons/"+id+"/available/staffs", StaffResponseDto[].class);
-            logger.info("In filter "+ Objects.requireNonNull(availableStaffs.getBody()).length + " staffs found");
+            StaffResponseDto[] availableStaffs = getAvailableStaffs(id);
             return ResponseEntity.ok(SalonDetailsDto.builder()
-                            .salon(salon.getBody())
-                            .staffs(Arrays.asList(Objects.requireNonNull(availableStaffs.getBody())))
+                            .salon(salon)
+                            .staffs(Arrays.asList(Objects.requireNonNull(availableStaffs)))
                     .build());
         }
-        logger.info("Out filter "+ Objects.requireNonNull(staffs.getBody()).length + " staffs found");
         return ResponseEntity.ok(SalonDetailsDto.builder()
-                .salon(salon.getBody())
-                .staffs(Arrays.asList(Objects.requireNonNull(staffs.getBody())))
+                .salon(salon)
+                .staffs(Arrays.asList(Objects.requireNonNull(staffs)))
                 .build());
     }
+
+    public ResponseEntity<SalonDetailsDto> getSalonDetailsFallback(Exception exception){
+        return ResponseEntity.ok(new SalonDetailsDto());
+    }
+
+    //@CircuitBreaker(name="salon-service",fallbackMethod = "getSalonFallback")
+    private SalonResponseDto getSalon(long id){
+        ResponseEntity<SalonResponseDto> salon = restTemplate.getForEntity(SALON_SERVICE_APPLICATION_BASE_URL+"/salons/"+id,SalonResponseDto.class);
+        return salon.getBody();
+    }
+
+    private SalonResponseDto getSalonFallback(Exception exception){
+        return new SalonResponseDto();
+    }
+
+    //@CircuitBreaker(name="staff-service",fallbackMethod = "getStaffsFallback")
+    private StaffResponseDto[] getStaffs(long id){
+        ResponseEntity<StaffResponseDto[]> staffs = restTemplate.getForEntity(STAFF_SERVICE_APPLICATION_BASE_URL+"/salons/"+id+"/staffs", StaffResponseDto[].class);
+        return staffs.getBody();
+    }
+
+    //@CircuitBreaker(name="staff-service",fallbackMethod = "getStaffsFallback")
+    private StaffResponseDto[] getAvailableStaffs(long id){
+        ResponseEntity<StaffResponseDto[]> availableStaffs = restTemplate.getForEntity(STAFF_SERVICE_APPLICATION_BASE_URL+"/salons/"+id+"/available/staffs", StaffResponseDto[].class);
+        return availableStaffs.getBody();
+    }
+
+    private StaffResponseDto[] getStaffsFallback(Exception exception){
+        return new StaffResponseDto[]{};
+    }
+
 }

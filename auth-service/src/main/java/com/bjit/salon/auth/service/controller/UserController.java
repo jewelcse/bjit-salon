@@ -1,4 +1,4 @@
-package com.bjit.salon.auth.service.controller.user.controller;
+package com.bjit.salon.auth.service.controller;
 
 import com.bjit.salon.auth.service.dto.user.service.request.UserIdDto;
 import com.bjit.salon.auth.service.service.UserService;
