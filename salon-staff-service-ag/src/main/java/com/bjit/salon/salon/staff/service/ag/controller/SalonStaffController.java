@@ -23,6 +23,11 @@ import static com.bjit.salon.salon.staff.service.ag.util.ConstraintsUtil.*;
 @RequestMapping(APPLICATION_BASE_URL)
 public class SalonStaffController {
 
+   private static  int i=0;
+
+
+    private final Logger log = LoggerFactory.getLogger(SalonStaffController.class);
+
     private final RestTemplate restTemplate;
     private static final Logger logger = LoggerFactory.getLogger(SalonStaffController.class);
 
@@ -30,6 +35,7 @@ public class SalonStaffController {
     @GetMapping("/salons/{id}")
     @CircuitBreaker(name="salon-service",fallbackMethod = "getSalonDetailsFallback")
     public ResponseEntity<SalonDetailsDto> getSalonDetails(@PathVariable("id") long id, @RequestParam(required= false, defaultValue = "false") boolean isAvailable){
+        log.info("getting salon details, called: " + i++ +" times");
         SalonResponseDto salon = getSalon(id);
         StaffResponseDto[] staffs = getStaffs(id);
         if (isAvailable){

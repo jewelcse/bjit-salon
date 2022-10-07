@@ -21,7 +21,7 @@ public class ConstraintsUtil {
             APPLICATION_BASE_URL+"/salons/**",
             SALON_STAFF_AG_SERVICE+"/salons/**",
             // todo: make this url public, now for testing purpose it's being made public directly
-            SALON_SERVICE+"/salons/search?q=**",
+            SALON_SERVICE+"/salons",
             "/actuator",
             "/actuator/health",
             "/actuator/health/**",

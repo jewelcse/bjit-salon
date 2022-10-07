@@ -72,6 +72,7 @@
 	</dependencyManagement>
 
 	<build>
+		<finalName>salon-staff-ag-service</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
