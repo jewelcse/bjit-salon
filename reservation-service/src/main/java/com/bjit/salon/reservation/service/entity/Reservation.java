@@ -35,7 +35,8 @@ public class Reservation {
     @Column(name = "total_payable_amount")
     private double totalPayableAmount;
 
-    @OneToMany(mappedBy ="reservation")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "reservation_id", referencedColumnName = "id")
     private List<Catalog> services;
 
 }

@@ -1,13 +1,12 @@
 package com.bjit.salon.reservation.service.serviceImpl;
 
 
-import com.bjit.salon.reservation.service.dto.producer.StaffActivity;
-import com.bjit.salon.reservation.service.dto.request.CatalogRequest;
 import com.bjit.salon.reservation.service.dto.producer.StaffActivityCreateDto;
-
+import com.bjit.salon.reservation.service.dto.request.CatalogRequest;
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
 import com.bjit.salon.reservation.service.dto.request.ReservationStartsDto;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
+import com.bjit.salon.reservation.service.entity.Catalog;
 import com.bjit.salon.reservation.service.entity.EWorkingStatus;
 import com.bjit.salon.reservation.service.entity.Reservation;
 import com.bjit.salon.reservation.service.exception.ReservationNotFoundException;
@@ -15,17 +14,11 @@ import com.bjit.salon.reservation.service.exception.ReservationTimeOverlapExcept
 import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException;
 import com.bjit.salon.reservation.service.mapper.ReservationMapper;
 import com.bjit.salon.reservation.service.producer.ReservationProducer;
+import com.bjit.salon.reservation.service.repository.CatalogRepository;
 import com.bjit.salon.reservation.service.repository.ReservationRepository;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.Date;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +31,7 @@ import static com.bjit.salon.reservation.service.util.MethodsUtil.minutesToLocal
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final CatalogRepository catalogRepository;
     private final ReservationMapper reservationMapper;
     private final ReservationProducer reservationProducer;
 
@@ -136,17 +130,16 @@ public class ReservationServiceImpl implements ReservationService {
                 .endTime(minutesToLocalTime(totalRequiredTime))
                 .workingStatus(EWorkingStatus.INITIATED)
                 .paymentMethod(reservationCreateDto.getPaymentMethod())
-                .totalPayableAmount(totalPayableAmount)
                 .services(reservationMapper.toCatalogs(reservationCreateDto.getServices()))
+                .totalPayableAmount(totalPayableAmount)
                 .build();
-
-        System.out.println("127 line:"+newReservation.toString());
-       
         reservationRepository.save(newReservation);
+
     }
 
     @Override
     public List<ReservationResponseDto> getAllReservationByStaff(long id) {
+        // todo: set the services to the response
         return reservationMapper.toReservationResponseList(reservationRepository.findAllByStaffId(id));
     }
 

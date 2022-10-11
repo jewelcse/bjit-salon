@@ -26,6 +26,4 @@ public class Catalog {
     private int approximateTimeForCompletion; // IN MINUTES
     @Column(name = "payable_amount")
     private double payableAmount;
-    @ManyToOne
-    private Reservation reservation;
 }
