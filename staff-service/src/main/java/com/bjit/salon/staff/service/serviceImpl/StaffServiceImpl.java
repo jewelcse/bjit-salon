@@ -4,8 +4,10 @@ import com.bjit.salon.staff.service.dto.request.StaffCreateDto;
 import com.bjit.salon.staff.service.dto.request.StaffUpdateDto;
 import com.bjit.salon.staff.service.dto.response.StaffResponseDto;
 import com.bjit.salon.staff.service.entity.Staff;
+import com.bjit.salon.staff.service.entity.StaffActivity;
 import com.bjit.salon.staff.service.exception.StaffNotFoundException;
 import com.bjit.salon.staff.service.mapper.StaffMapper;
+import com.bjit.salon.staff.service.repository.StaffActivityRepository;
 import com.bjit.salon.staff.service.repository.StaffRepository;
 import com.bjit.salon.staff.service.service.StaffService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class StaffServiceImpl implements StaffService {
     private static final Logger logger = LoggerFactory.getLogger(StaffServiceImpl.class);
 
     private final StaffRepository staffRepository;
+    private final StaffActivityRepository staffActivityRepository;
     private final StaffMapper staffMapper;
     @Override
     public void createNewStaff(StaffCreateDto staffCreateDto) {
@@ -60,7 +63,20 @@ public class StaffServiceImpl implements StaffService {
             throw new StaffNotFoundException("Staff not found for id: "+ id);
         }
         logger.info("getting staff with: " + staff.get());
-        return staffMapper.toStaffResponseDto(staff.get());
+
+        List<StaffActivity> activities = staffActivityRepository.findAllByStaffId(id);
+
+
+        return StaffResponseDto.builder()
+                .salonId(staff.get().getSalonId())
+                .userId(staff.get().getUserId())
+                .address(staff.get().getAddress())
+                .contractNumber(staff.get().getContractNumber())
+                .isAvailable(staff.get().isAvailable())
+                .employeementDate(staff.get().getEmployeementDate())
+                .employeementType(staff.get().getEmployeementType())
+                .activities(activities)
+                .build();
     }
 
     @Override

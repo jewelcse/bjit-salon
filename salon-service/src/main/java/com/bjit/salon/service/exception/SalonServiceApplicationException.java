@@ -35,6 +35,12 @@ public class SalonServiceApplicationException {
                 .body(new ExceptionResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(value = CatalogNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> catalogNotFoundException(CatalogNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ExceptionResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(value = SalonNameAlreadyTakenException.class)
     public ResponseEntity<ExceptionResponse> salonNameAlreadyTakenException(SalonNameAlreadyTakenException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

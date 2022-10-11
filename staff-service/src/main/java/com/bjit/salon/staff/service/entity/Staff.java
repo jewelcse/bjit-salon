@@ -27,4 +27,5 @@ public class Staff {
     private double salary;
     private String employeementDate;
     private String employeementType;
+
 }

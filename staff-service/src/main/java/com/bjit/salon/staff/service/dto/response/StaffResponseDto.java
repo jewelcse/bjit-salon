@@ -1,7 +1,10 @@
 package com.bjit.salon.staff.service.dto.response;
 
 
+import com.bjit.salon.staff.service.entity.StaffActivity;
 import lombok.*;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,4 +21,5 @@ public class StaffResponseDto {
     private double salary;
     private String employeementDate;
     private String employeementType;
+    private List<StaffActivity> activities;
 }

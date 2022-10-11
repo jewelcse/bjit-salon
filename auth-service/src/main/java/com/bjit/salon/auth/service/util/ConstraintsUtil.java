@@ -7,19 +7,21 @@ import lombok.experimental.UtilityClass;
 public class ConstraintsUtil {
 
     public static final String APPLICATION_BASE_URL = "/api/v1";
-    public static final String SALON_STAFF_AG_SERVICE_APPLICATION_BASE_URL ="http://localhost:8084/api/v1";
-
 
 
     // gateway urls
-    public static final String SALON_SERVICE ="/salons-service/api/v1/";
-    public static final String STAFF_SERVICE ="/staffs-service/api/v1/";
+    public static final String SALON_SERVICE ="/salons-service/api/v1";
+    public static final String STAFF_SERVICE ="/staffs-service/api/v1";
+    public static final String SALON_STAFF_AG_SERVICE ="/salons-staff-ag-service/api/v1";
 
     public static final String[] APPLICATION_PUBLIC_URL= new String[]{
             APPLICATION_BASE_URL+"/sign-in",
             APPLICATION_BASE_URL+"/sign-up",
             APPLICATION_BASE_URL+"/",
             APPLICATION_BASE_URL+"/salons/**",
+            SALON_STAFF_AG_SERVICE+"/salons/**",
+            // todo: make this url public, now for testing purpose it's being made public directly
+            SALON_SERVICE+"/salons",
             "/actuator",
             "/actuator/health",
             "/actuator/health/**",
