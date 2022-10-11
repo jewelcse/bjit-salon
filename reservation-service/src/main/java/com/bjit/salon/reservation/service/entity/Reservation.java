@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,5 +32,10 @@ public class Reservation {
     @Column(name = "payment_method")
     @Enumerated(EnumType.STRING)
     private EPaymentMethod paymentMethod;
+    @Column(name = "total_payable_amount")
+    private double totalPayableAmount;
+
+    @OneToMany(mappedBy ="reservation")
+    private List<Catalog> services;
 
 }

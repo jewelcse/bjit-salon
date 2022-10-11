@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,4 +23,5 @@ public class ReservationCreateDto {
     private LocalTime startTime;
     private LocalTime endTime;
     private EPaymentMethod paymentMethod; // payment method
+    private List<CatalogRequest> services;
 }
