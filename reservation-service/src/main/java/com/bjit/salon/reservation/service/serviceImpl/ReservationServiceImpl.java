@@ -1,6 +1,7 @@
 package com.bjit.salon.reservation.service.serviceImpl;
 
 import com.bjit.salon.reservation.service.dto.producer.StaffActivity;
+import com.bjit.salon.reservation.service.dto.request.CatalogRequest;
 import com.bjit.salon.reservation.service.dto.request.ReservationCreateDto;
 import com.bjit.salon.reservation.service.dto.request.ReservationStartsDto;
 import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
@@ -18,10 +19,13 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static com.bjit.salon.reservation.service.util.MethodsUtil.minutesToLocalTime;
 
 @RequiredArgsConstructor
 @Service
@@ -98,15 +102,29 @@ public class ReservationServiceImpl implements ReservationService {
         if (alreadyHasReservation){
             throw new StaffAlreadyEngagedException("The reservation has already taken");
         }
+        
+        double totalPayableAmount = reservationCreateDto.getServices()
+                .stream().filter(service ->service.getPayableAmount() != 0.0)
+                .mapToDouble(CatalogRequest::getPayableAmount).sum();
+        
+        int totalRequiredTime = reservationCreateDto.getServices()
+                .stream().filter(service -> service.getApproximateTimeForCompletion() != 0)
+                .mapToInt(CatalogRequest::getApproximateTimeForCompletion).sum();
+
+
         Reservation newReservation = Reservation.builder()
                 .staffId(reservationCreateDto.getStaffId())
                 .consumerId(reservationCreateDto.getConsumerId())
                 .reservationDate(reservationCreateDto.getReservationDate())
                 .startTime(reservationCreateDto.getStartTime())
-                .endTime(reservationCreateDto.getEndTime())
+                .endTime(minutesToLocalTime(totalRequiredTime))
                 .workingStatus(EWorkingStatus.INITIATED)
                 .paymentMethod(reservationCreateDto.getPaymentMethod())
+                .totalPayableAmount(totalPayableAmount)
+                .services(reservationMapper.toCatalogs(reservationCreateDto.getServices()))
                 .build();
+
+        System.out.println("127 line:"+newReservation.toString());
         reservationRepository.save(newReservation);
     }
 }
