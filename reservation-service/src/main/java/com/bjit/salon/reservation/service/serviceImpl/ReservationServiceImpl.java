@@ -7,6 +7,7 @@ import com.bjit.salon.reservation.service.dto.response.ReservationResponseDto;
 import com.bjit.salon.reservation.service.entity.EWorkingStatus;
 import com.bjit.salon.reservation.service.entity.Reservation;
 import com.bjit.salon.reservation.service.exception.ReservationNotFoundException;
+import com.bjit.salon.reservation.service.exception.ReservationTimeOverlapException;
 import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException;
 import com.bjit.salon.reservation.service.mapper.ReservationMapper;
 import com.bjit.salon.reservation.service.producer.ReservationProducer;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -28,29 +30,91 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public void createReservation(ReservationCreateDto reservationCreateDto) {
+        if (reservationCreateDto.getEndTime().isAfter(reservationCreateDto.getStartTime())) {
+            List<Reservation> currentReservationByStaff = reservationRepository
+                    .findAllByStaffIdAndReservationDate(reservationCreateDto.getStaffId(), reservationCreateDto.getReservationDate());
+            if (currentReservationByStaff.size() == 0) {
+                // if there are no reservation in this date,
+                //  no need to check. create a new reservation on this day
+                saveReservation(reservationCreateDto);
+            } else {
+                // getting the lastCompletedOrProcessing reservation bcz, before that time
+                // there is no possible to make any reservation
+                Optional<Reservation> lastCompletedOrProcessingReservation = currentReservationByStaff
+                        .stream().filter(item -> item.getWorkingStatus().equals(EWorkingStatus.COMPLETED)
+                                || item.getWorkingStatus().equals(EWorkingStatus.PROCESSING))
+                        .reduce((first, second) -> second);
 
-        boolean isAdvancedReservation = false;
-        boolean isAvailableAndFree = false;
-
-        List<Reservation> currentDayReservations = reservationRepository.findAllByReservationDate(reservationCreateDto.getReservationDate());
-
-        if (currentDayReservations.size() == 0) {
-            saveReservation(reservationCreateDto);
-        }else {
-            isAdvancedReservation = currentDayReservations
-                    .stream().anyMatch(item -> item.getWorkingStatus().equals(EWorkingStatus.INITIATED)
-                            && reservationCreateDto.getEndTime().isBefore(item.getStartTime()));
-
-            isAvailableAndFree = currentDayReservations.stream().anyMatch(
-                    item -> item.getWorkingStatus().equals(EWorkingStatus.PROCESSING)
-                            || item.getWorkingStatus().equals(EWorkingStatus.INITIATED)
-                                    && reservationCreateDto.getStartTime().isAfter(item.getEndTime()));
+                if (lastCompletedOrProcessingReservation.isPresent()) {
+                    if (reservationCreateDto.getStartTime().isAfter(lastCompletedOrProcessingReservation.get().getEndTime())) {
+                        // now have to check the new reservation with the advanced(if it has any INITIATED reservations)
+                        //  if no INITIATED reservation are there, so create new reservation else
+                        //  check with the existing INITIATED reservations, if you have any available slot then create new reservation
+                        List<Reservation> initiatedReservations = getInitiatedReservations(currentReservationByStaff);
+                        if (initiatedReservations.size() == 0) {
+                            // means there are no advanced reservations, so create reservation
+                            saveReservation(reservationCreateDto);
+                        } else {
+                            // have to compare with the all INITIATED reservations
+                            checkingReservation(reservationCreateDto, initiatedReservations);
+                        }
+                    } else {
+                        throw new ReservationTimeOverlapException("Invalid Time for reservation: start time should be after, all previous completed or processing work!");
+                    }
+                } else {
+                    // if no completed or processing work, then obviously all are initiative work list
+                    List<Reservation> initiatedReservations = getInitiatedReservations(currentReservationByStaff);
+                    checkingReservation(reservationCreateDto, initiatedReservations);
+                }
+            }
+        } else {
+            throw new ReservationTimeOverlapException("Invalid Time: end time must be greater than start time");
         }
-        if (isAdvancedReservation || isAvailableAndFree) {
+    }
+
+    private List<Reservation> getInitiatedReservations(List<Reservation> currentReservationByStaff) {
+        return currentReservationByStaff
+                .stream().filter(reservation -> reservation.getWorkingStatus().equals(EWorkingStatus.INITIATED))
+                .collect(Collectors.toList());
+
+    }
+
+    private void checkingReservation(ReservationCreateDto reservationCreateDto, List<Reservation> initiatedReservations) {
+        Optional<Reservation> hasPreviousReservations = initiatedReservations
+                .stream().filter(reservation -> reservation.getEndTime().isBefore(reservationCreateDto.getStartTime()))
+                .reduce((item1, item2) -> item2); // get the immediate previous
+
+        Optional<Reservation> hasNextReservations = initiatedReservations
+                .stream().filter(reservation -> reservation.getStartTime().isAfter(reservationCreateDto.getEndTime()))
+                .reduce((item1, item2) -> item2); // get the immediate next
+
+        if (hasPreviousReservations.isPresent() && hasNextReservations.isPresent()) {
+            saveReservation(reservationCreateDto);
+        }else if(hasPreviousReservations.isPresent()){ // if no hasNextReservation
+            saveReservation(reservationCreateDto);
+        }else if(hasNextReservations.isPresent()){ // if no hasPreviousReservation
             saveReservation(reservationCreateDto);
         } else {
-            throw new StaffAlreadyEngagedException("The staff is not free right now, please try another time");
+            throw new ReservationTimeOverlapException("Invalid Time overlapping...");
         }
+    }
+
+    private void saveReservation(ReservationCreateDto reservationCreateDto) {
+        boolean alreadyHasReservation = reservationRepository
+                .existsByStartTimeAndEndTime(reservationCreateDto.getStartTime(), reservationCreateDto.getEndTime());
+        if (alreadyHasReservation) {
+            throw new StaffAlreadyEngagedException("The reservation has already taken");
+        }
+        Reservation newReservation = Reservation.builder()
+                .staffId(reservationCreateDto.getStaffId())
+                .consumerId(reservationCreateDto.getConsumerId())
+                .reservationDate(reservationCreateDto.getReservationDate())
+                .startTime(reservationCreateDto.getStartTime())
+                .endTime(reservationCreateDto.getEndTime())
+                .workingStatus(EWorkingStatus.INITIATED)
+                .paymentMethod(reservationCreateDto.getPaymentMethod())
+                .build();
+        reservationRepository.save(newReservation);
     }
 
     @Override
@@ -86,23 +150,5 @@ public class ReservationServiceImpl implements ReservationService {
 
     }
 
-    private void saveReservation(ReservationCreateDto reservationCreateDto) {
 
-        boolean alreadyHasReservation = reservationRepository
-                .existsByStartTimeAndEndTime(reservationCreateDto.getStartTime(),reservationCreateDto.getEndTime());
-
-        if (alreadyHasReservation){
-            throw new StaffAlreadyEngagedException("The reservation has already taken");
-        }
-        Reservation newReservation = Reservation.builder()
-                .staffId(reservationCreateDto.getStaffId())
-                .consumerId(reservationCreateDto.getConsumerId())
-                .reservationDate(reservationCreateDto.getReservationDate())
-                .startTime(reservationCreateDto.getStartTime())
-                .endTime(reservationCreateDto.getEndTime())
-                .workingStatus(EWorkingStatus.INITIATED)
-                .paymentMethod(reservationCreateDto.getPaymentMethod())
-                .build();
-        reservationRepository.save(newReservation);
-    }
 }
