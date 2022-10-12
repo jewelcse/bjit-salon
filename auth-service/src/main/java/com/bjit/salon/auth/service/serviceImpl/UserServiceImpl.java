@@ -25,9 +25,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
@@ -80,9 +77,7 @@ public class UserServiceImpl implements UserService {
                 .enabled(true)
                 .nonLocked(true)
                 .build();
-        logger.info("Saving user account with email: "+ user.getEmail() + " and roles: " + user.getRoles());
         userRepository.save(user);
-        logger.info("Saved user account to the database");
     }
 
     @Override
@@ -93,15 +88,11 @@ public class UserServiceImpl implements UserService {
         }
         if (user.get().isNonLocked()) {
             user.get().setNonLocked(false);
-            logger.info("Account deactivating...");
             userRepository.save(user.get());
-            logger.info("Account deactivated");
             return false;
         }
         user.get().setNonLocked(true);
-        logger.info("Account activating...");
         userRepository.save(user.get());
-        logger.info("Account activated");
         return true;
     }
 }

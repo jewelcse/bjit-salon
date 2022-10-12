@@ -12,6 +12,7 @@ public class ConstraintsUtil {
     // gateway urls
     public static final String SALON_SERVICE ="/salons-service/api/v1";
     public static final String STAFF_SERVICE ="/staffs-service/api/v1";
+    public static final String RESERVATION_SERVICE ="/reservations/api/v1";
     public static final String SALON_STAFF_AG_SERVICE ="/salons-staff-ag-service/api/v1";
 
     public static final String[] APPLICATION_PUBLIC_URL= new String[]{
@@ -20,6 +21,7 @@ public class ConstraintsUtil {
             APPLICATION_BASE_URL+"/",
             APPLICATION_BASE_URL+"/salons/**",
             SALON_STAFF_AG_SERVICE+"/salons/**",
+            RESERVATION_SERVICE,
             // todo: make this url public, now for testing purpose it's being made public directly
             SALON_SERVICE+"/salons",
             "/actuator",

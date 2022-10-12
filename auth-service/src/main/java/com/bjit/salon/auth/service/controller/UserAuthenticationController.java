@@ -8,6 +8,8 @@ import com.bjit.salon.auth.service.security.jwt.JwtUtil;
 import com.bjit.salon.auth.service.service.UserService;
 import com.bjit.salon.auth.service.serviceImpl.UserDetailsImpl;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +29,7 @@ import static com.bjit.salon.auth.service.util.ConstraintsUtil.APPLICATION_BASE_
 @RequestMapping(APPLICATION_BASE_URL)
 public class UserAuthenticationController {
 
+    private static final Logger log = LoggerFactory.getLogger(UserAuthenticationController.class);
 
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
@@ -34,6 +37,7 @@ public class UserAuthenticationController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody UserLoginDto loginDto) {
+        log.info("Signing with username: {}",loginDto.getUsername());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -53,6 +57,7 @@ public class UserAuthenticationController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> registerAccount(@Valid @RequestBody UserRegisterDto registerDto) {
+        log.info("Creating new account with username: {}",registerDto.getUsername());
         userService.createUserAccount(registerDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("Register new account success");
     }
