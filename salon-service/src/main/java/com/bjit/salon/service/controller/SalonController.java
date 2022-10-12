@@ -22,18 +22,20 @@ import static com.bjit.salon.service.util.ConstraintsUtil.APPLICATION_BASE_URL;
 @RestController
 @RequestMapping(APPLICATION_BASE_URL)
 public class SalonController {
-
-    private final SalonService salonService;
     private final Logger log = LoggerFactory.getLogger(SalonController.class);
+    private final SalonService salonService;
+
 
     @PostMapping("/salons") // admin can create salon
     public ResponseEntity<String> create(@RequestBody SalonCreateDto salonCreateDto){
+        log.info("Creating salon with name: {}", salonCreateDto.getName());
         salonService.create(salonCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("Salon created success");
     }
 
     @PutMapping("/salons") // admin can update
     public ResponseEntity<String> update(@RequestBody SalonUpdateDto salonUpdateDto){
+        log.info("Updating salon with name: {}",salonUpdateDto.getName());
         salonService.update(salonUpdateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("Salon updated success");
     }
@@ -41,6 +43,7 @@ public class SalonController {
     @GetMapping("/salons/{id}") // admin can view
     @CircuitBreaker(name = "salon-service", fallbackMethod = "getSalonFallback")
     public ResponseEntity<SalonResponseDto> get(@PathVariable("id") Long id){
+        log.info("Getting salon details with salon id: {}",id);
         return ResponseEntity.ok(salonService.getSalon(id));
     }
     public ResponseEntity<SalonResponseDto> getSalonFallback(Exception exception){
@@ -49,8 +52,9 @@ public class SalonController {
     @GetMapping("/salons")
     @CircuitBreaker(name = "salon-service", fallbackMethod = "getAllSalonFallback")
     public ResponseEntity<List<SalonResponseDto>> getAll(){
-        log.info("getting salons from salon-service");
-        return ResponseEntity.ok(salonService.getAllSalon());
+        List<SalonResponseDto> allSalon = salonService.getAllSalon();
+        log.info("getting salons, size: {}",allSalon.size());
+        return ResponseEntity.ok(allSalon);
     }
     public ResponseEntity<List<SalonResponseDto>> getAllSalonFallback(Exception exception) {
         return ResponseEntity.ok(new ArrayList<>());
@@ -59,6 +63,7 @@ public class SalonController {
     @GetMapping("/salons/search")
     @CircuitBreaker(name = "salon-service", fallbackMethod = "searchFallback")
     public ResponseEntity<List<SalonResponseDto>> search(@RequestParam("q") String str){
+        log.info("Searching salons with query: {}",str);
         return ResponseEntity.ok(salonService.getSalonsByQuery(str));
     }
     public ResponseEntity<List<SalonResponseDto>>searchFallback(Exception exception){
