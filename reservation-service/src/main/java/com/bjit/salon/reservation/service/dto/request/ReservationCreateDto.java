@@ -21,7 +21,6 @@ public class ReservationCreateDto {
     private long consumerId; // user id
     private LocalDate reservationDate;
     private LocalTime startTime;
-    private LocalTime endTime;
     private EPaymentMethod paymentMethod; // payment method
     private List<CatalogRequest> services;
 }

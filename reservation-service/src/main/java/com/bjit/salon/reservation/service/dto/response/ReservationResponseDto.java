@@ -27,5 +27,6 @@ public class ReservationResponseDto {
     private LocalTime endTime;
     private EWorkingStatus workingStatus;
     private EPaymentMethod paymentMethod;
-    private List<Catalog> service;
+    private double totalPayableAmount;
+    private List<CatalogResponse> services;
 }

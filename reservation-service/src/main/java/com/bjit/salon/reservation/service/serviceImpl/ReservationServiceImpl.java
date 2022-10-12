@@ -20,6 +20,7 @@ import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,45 +38,53 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public void createReservation(ReservationCreateDto reservationCreateDto) {
-        if (reservationCreateDto.getEndTime().isAfter(reservationCreateDto.getStartTime())) {
-            List<Reservation> currentReservationByStaff = reservationRepository
-                    .findAllByStaffIdAndReservationDate(reservationCreateDto.getStaffId(), reservationCreateDto.getReservationDate());
-            if (currentReservationByStaff.size() == 0) {
-                // if there are no reservation in this date,
-                //  no need to check. create a new reservation on this day
-                saveReservation(reservationCreateDto);
-            } else {
-                // getting the lastCompletedOrProcessing reservation bcz, before that time
-                // there is no possible to make any reservation
-                Optional<Reservation> lastCompletedOrProcessingReservation = currentReservationByStaff
-                        .stream().filter(item -> item.getWorkingStatus().equals(EWorkingStatus.COMPLETED)
-                                || item.getWorkingStatus().equals(EWorkingStatus.PROCESSING))
-                        .reduce((first, second) -> second);
 
-                if (lastCompletedOrProcessingReservation.isPresent()) {
-                    if (reservationCreateDto.getStartTime().isAfter(lastCompletedOrProcessingReservation.get().getEndTime())) {
-                        // now have to check the new reservation with the advanced(if it has any INITIATED reservations)
-                        //  if no INITIATED reservation are there, so create new reservation else
-                        //  check with the existing INITIATED reservations, if you have any available slot then create new reservation
-                        List<Reservation> initiatedReservations = getInitiatedReservations(currentReservationByStaff);
-                        if (initiatedReservations.size() == 0) {
-                            // means there are no advanced reservations, so create reservation
-                            saveReservation(reservationCreateDto);
-                        } else {
-                            // have to compare with the all INITIATED reservations
-                            checkingReservation(reservationCreateDto, initiatedReservations);
-                        }
+        // calculate the approximate end time first
+        int totalRequiredMinutes = reservationCreateDto.getServices()
+                .stream().filter(service -> service.getApproximateTimeForCompletion() != 0)
+                .mapToInt(CatalogRequest::getApproximateTimeForCompletion).sum();
+
+        LocalTime endTime = minutesToLocalTime(totalRequiredMinutes);
+
+        LocalTime approximateEndTime = reservationCreateDto
+                .getStartTime().plusHours(endTime.getHour())
+                .plusMinutes(endTime.getMinute());
+        // get the respective staff reservations
+        List<Reservation> currentReservationByStaff = reservationRepository
+                .findAllByStaffIdAndReservationDate(reservationCreateDto.getStaffId(), reservationCreateDto.getReservationDate());
+        if (currentReservationByStaff.size() == 0) {
+            // if there are no reservation in this date,
+            //  no need to check. create a new reservation on this day
+            saveReservation(reservationCreateDto,approximateEndTime);
+        } else {
+            // getting the lastCompletedOrProcessing reservation bcz, before that time
+            // there is no possible to make any reservation
+            Optional<Reservation> lastCompletedOrProcessingReservation = currentReservationByStaff
+                    .stream().filter(item -> item.getWorkingStatus().equals(EWorkingStatus.COMPLETED)
+                            || item.getWorkingStatus().equals(EWorkingStatus.PROCESSING))
+                    .reduce((first, second) -> second);
+
+            if (lastCompletedOrProcessingReservation.isPresent()) {
+                if (reservationCreateDto.getStartTime().isAfter(lastCompletedOrProcessingReservation.get().getEndTime())) {
+                    // now have to check the new reservation with the advanced(if it has any INITIATED reservations)
+                    //  if no INITIATED reservation are there, so create new reservation else
+                    //  check with the existing INITIATED reservations, if you have any available slot then create new reservation
+                    List<Reservation> initiatedReservations = getInitiatedReservations(currentReservationByStaff);
+                    if (initiatedReservations.size() == 0) {
+                        // means there are no advanced reservations, so create reservation
+                        saveReservation(reservationCreateDto,approximateEndTime);
                     } else {
-                        throw new ReservationTimeOverlapException("Invalid Time for reservation: start time should be after, all previous completed or processing work!");
+                        // have to compare with the all INITIATED reservations
+                        checkingReservation(reservationCreateDto, initiatedReservations,approximateEndTime);
                     }
                 } else {
-                    // if no completed or processing work, then obviously all are initiative work list
-                    List<Reservation> initiatedReservations = getInitiatedReservations(currentReservationByStaff);
-                    checkingReservation(reservationCreateDto, initiatedReservations);
+                    throw new ReservationTimeOverlapException("Invalid Time for reservation: start time should be after, all previous completed or processing work!");
                 }
+            } else {
+                // if no completed or processing work, then obviously all are initiative work list
+                List<Reservation> initiatedReservations = getInitiatedReservations(currentReservationByStaff);
+                checkingReservation(reservationCreateDto, initiatedReservations,approximateEndTime);
             }
-        } else {
-            throw new ReservationTimeOverlapException("Invalid Time: end time must be greater than start time");
         }
     }
 
@@ -86,48 +95,44 @@ public class ReservationServiceImpl implements ReservationService {
 
     }
 
-    private void checkingReservation(ReservationCreateDto reservationCreateDto, List<Reservation> initiatedReservations) {
+    private void checkingReservation(ReservationCreateDto reservationCreateDto, List<Reservation> initiatedReservations, LocalTime approximateEndTime) {
+
         Optional<Reservation> hasPreviousReservations = initiatedReservations
                 .stream().filter(reservation -> reservation.getEndTime().isBefore(reservationCreateDto.getStartTime()))
                 .reduce((item1, item2) -> item2); // get the immediate previous
 
         Optional<Reservation> hasNextReservations = initiatedReservations
-                .stream().filter(reservation -> reservation.getStartTime().isAfter(reservationCreateDto.getEndTime()))
+                .stream().filter(reservation -> reservation.getStartTime().isAfter(approximateEndTime))
                 .reduce((item1, item2) -> item2); // get the immediate next
 
         if (hasPreviousReservations.isPresent() && hasNextReservations.isPresent()) {
-            saveReservation(reservationCreateDto);
-        }else if(hasPreviousReservations.isPresent()){ // if no hasNextReservation
-            saveReservation(reservationCreateDto);
-        }else if(hasNextReservations.isPresent()){ // if no hasPreviousReservation
-            saveReservation(reservationCreateDto);
+            saveReservation(reservationCreateDto,approximateEndTime);
+        } else if (hasPreviousReservations.isPresent()) { // if no hasNextReservation
+            saveReservation(reservationCreateDto,approximateEndTime);
+        } else if (hasNextReservations.isPresent()) { // if no hasPreviousReservation
+            saveReservation(reservationCreateDto,approximateEndTime);
         } else {
             throw new ReservationTimeOverlapException("Invalid Time overlapping...");
         }
     }
 
-    private void saveReservation(ReservationCreateDto reservationCreateDto) {
+    private void saveReservation(ReservationCreateDto reservationCreateDto, LocalTime approximateEndTime) {
         boolean alreadyHasReservation = reservationRepository
-                .existsByStartTimeAndEndTime(reservationCreateDto.getStartTime(), reservationCreateDto.getEndTime());
-        if (alreadyHasReservation){
+                .existsByStartTimeAndEndTime(reservationCreateDto.getStartTime(), approximateEndTime);
+        if (alreadyHasReservation) {
             throw new StaffAlreadyEngagedException("The reservation has already taken");
         }
-        
-        double totalPayableAmount = reservationCreateDto.getServices()
-                .stream().filter(service ->service.getPayableAmount() != 0.0)
-                .mapToDouble(CatalogRequest::getPayableAmount).sum();
-        
-        int totalRequiredTime = reservationCreateDto.getServices()
-                .stream().filter(service -> service.getApproximateTimeForCompletion() != 0)
-                .mapToInt(CatalogRequest::getApproximateTimeForCompletion).sum();
 
+        double totalPayableAmount = reservationCreateDto.getServices()
+                .stream().filter(service -> service.getPayableAmount() != 0.0)
+                .mapToDouble(CatalogRequest::getPayableAmount).sum();
 
         Reservation newReservation = Reservation.builder()
                 .staffId(reservationCreateDto.getStaffId())
                 .consumerId(reservationCreateDto.getConsumerId())
                 .reservationDate(reservationCreateDto.getReservationDate())
                 .startTime(reservationCreateDto.getStartTime())
-                .endTime(minutesToLocalTime(totalRequiredTime))
+                .endTime(approximateEndTime)
                 .workingStatus(EWorkingStatus.INITIATED)
                 .paymentMethod(reservationCreateDto.getPaymentMethod())
                 .services(reservationMapper.toCatalogs(reservationCreateDto.getServices()))
@@ -139,8 +144,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<ReservationResponseDto> getAllReservationByStaff(long id) {
-        // todo: set the services to the response
-        return reservationMapper.toReservationResponseList(reservationRepository.findAllByStaffId(id));
+        return reservationMapper.reservationsToReservationResponses(reservationRepository.findAllByStaffId(id));
     }
 
     @Override
