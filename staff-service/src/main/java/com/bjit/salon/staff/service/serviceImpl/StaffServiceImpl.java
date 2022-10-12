@@ -22,22 +22,17 @@ import java.util.Optional;
 @Service
 public class StaffServiceImpl implements StaffService {
 
-    private static final Logger logger = LoggerFactory.getLogger(StaffServiceImpl.class);
-
     private final StaffRepository staffRepository;
     private final StaffActivityRepository staffActivityRepository;
     private final StaffMapper staffMapper;
     @Override
     public void createNewStaff(StaffCreateDto staffCreateDto) {
-        logger.info("adding new staff with " + staffCreateDto.toString());
         // todo: add new staff role to the user since now this user belong to staff
         staffRepository.save(staffMapper.toStaff(staffCreateDto));
-        logger.info("added new staff completed");
     }
 
     @Override
     public void updateStaff(StaffUpdateDto staffUpdateDto) {
-        logger.info("updating staff with " + staffUpdateDto.toString());
         Optional<Staff> staff = staffRepository.findById(staffUpdateDto.getId());
         if (staff.isEmpty()){
             throw new StaffNotFoundException("staff not found for id: " + staffUpdateDto.getId());
@@ -53,7 +48,6 @@ public class StaffServiceImpl implements StaffService {
                 .contractNumber(staffUpdateDto.getContractNumber())
                         .build();
         staffRepository.save(updateStaff);
-        logger.info("updated staff completed");
     }
 
     @Override
@@ -62,11 +56,7 @@ public class StaffServiceImpl implements StaffService {
         if (staff.isEmpty()){
             throw new StaffNotFoundException("Staff not found for id: "+ id);
         }
-        logger.info("getting staff with: " + staff.get());
-
         List<StaffActivity> activities = staffActivityRepository.findAllByStaffId(id);
-
-
         return StaffResponseDto.builder()
                 .salonId(staff.get().getSalonId())
                 .userId(staff.get().getUserId())
@@ -81,7 +71,6 @@ public class StaffServiceImpl implements StaffService {
 
     @Override
     public List<StaffResponseDto> getAllStaff() {
-        logger.info("getting staff list with size: " + staffRepository.findAll().size());
         return staffMapper.toListOfStaffResponseDto(staffRepository.findAll());
     }
 
