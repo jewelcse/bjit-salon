@@ -14,10 +14,11 @@ import com.bjit.salon.reservation.service.exception.ReservationTimeOverlapExcept
 import com.bjit.salon.reservation.service.exception.StaffAlreadyEngagedException;
 import com.bjit.salon.reservation.service.mapper.ReservationMapper;
 import com.bjit.salon.reservation.service.producer.ReservationProducer;
-import com.bjit.salon.reservation.service.repository.CatalogRepository;
 import com.bjit.salon.reservation.service.repository.ReservationRepository;
 import com.bjit.salon.reservation.service.service.ReservationService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
@@ -32,7 +33,6 @@ import static com.bjit.salon.reservation.service.util.MethodsUtil.minutesToLocal
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final CatalogRepository catalogRepository;
     private final ReservationMapper reservationMapper;
     private final ReservationProducer reservationProducer;
 
@@ -144,7 +144,8 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<ReservationResponseDto> getAllReservationByStaff(long id) {
-        return reservationMapper.reservationsToReservationResponses(reservationRepository.findAllByStaffId(id));
+        List<Reservation> allByStaffId = reservationRepository.findAllByStaffId(id);
+        return reservationMapper.reservationsToReservationResponses(allByStaffId);
     }
 
     @Override
@@ -158,7 +159,7 @@ public class ReservationServiceImpl implements ReservationService {
         currentReservation.get().setWorkingStatus(reservationStartsDto.getStatus());
         reservationRepository.save(currentReservation.get());
 
-        // todo: an event will be published to the staff service
+        // event publishes to the staff service for creating a new activity
 
         StaffActivityCreateDto newActivity = StaffActivityCreateDto
                 .builder()
@@ -172,7 +173,6 @@ public class ReservationServiceImpl implements ReservationService {
                 .build();
 
         reservationProducer.createNewActivity(newActivity);
-
     }
 
 
