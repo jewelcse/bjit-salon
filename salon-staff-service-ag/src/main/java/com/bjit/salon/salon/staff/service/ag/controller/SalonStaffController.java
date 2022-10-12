@@ -35,7 +35,6 @@ public class SalonStaffController {
     @GetMapping("/salons/{id}")
     @CircuitBreaker(name="salon-service",fallbackMethod = "getSalonDetailsFallback")
     public ResponseEntity<SalonDetailsDto> getSalonDetails(@PathVariable("id") long id, @RequestParam(required= false, defaultValue = "false") boolean isAvailable){
-        log.info("getting salon details, called: " + i++ +" times");
         SalonResponseDto salon = getSalon(id);
         StaffResponseDto[] staffs = getStaffs(id);
         if (isAvailable){
@@ -45,6 +44,7 @@ public class SalonStaffController {
                             .staffs(Arrays.asList(Objects.requireNonNull(availableStaffs)))
                     .build());
         }
+        log.info("Getting salon details with staff: {}, {}",salon,staffs);
         return ResponseEntity.ok(SalonDetailsDto.builder()
                 .salon(salon)
                 .staffs(Arrays.asList(Objects.requireNonNull(staffs)))
@@ -58,6 +58,7 @@ public class SalonStaffController {
     //@CircuitBreaker(name="salon-service",fallbackMethod = "getSalonFallback")
     private SalonResponseDto getSalon(long id){
         ResponseEntity<SalonResponseDto> salon = restTemplate.getForEntity(SALON_SERVICE_APPLICATION_BASE_URL+"/salons/"+id,SalonResponseDto.class);
+        log.info("Getting Salon Details from salon service: {}",salon.getBody());
         return salon.getBody();
     }
 
@@ -68,12 +69,14 @@ public class SalonStaffController {
     //@CircuitBreaker(name="staff-service",fallbackMethod = "getStaffsFallback")
     private StaffResponseDto[] getStaffs(long id){
         ResponseEntity<StaffResponseDto[]> staffs = restTemplate.getForEntity(STAFF_SERVICE_APPLICATION_BASE_URL+"/salons/"+id+"/staffs", StaffResponseDto[].class);
+        log.info("Getting Staff Details from staff service: {}", (Object) staffs.getBody());
         return staffs.getBody();
     }
 
     //@CircuitBreaker(name="staff-service",fallbackMethod = "getStaffsFallback")
     private StaffResponseDto[] getAvailableStaffs(long id){
         ResponseEntity<StaffResponseDto[]> availableStaffs = restTemplate.getForEntity(STAFF_SERVICE_APPLICATION_BASE_URL+"/salons/"+id+"/available/staffs", StaffResponseDto[].class);
+        log.info("Getting Available Staff Details from staff service: {}", (Object) availableStaffs.getBody());
         return availableStaffs.getBody();
     }
 
