@@ -19,11 +19,10 @@ public class ConstraintsUtil {
             APPLICATION_BASE_URL+"/sign-in",
             APPLICATION_BASE_URL+"/sign-up",
             APPLICATION_BASE_URL+"/",
-            APPLICATION_BASE_URL+"/salons/**",
             SALON_STAFF_AG_SERVICE+"/salons/**",
-            RESERVATION_SERVICE,
+            RESERVATION_SERVICE+"/**",
             // todo: make this url public, now for testing purpose it's being made public directly
-            SALON_SERVICE+"/salons",
+            SALON_SERVICE+"/**",
             "/actuator",
             "/actuator/health",
             "/actuator/health/**",
@@ -32,17 +31,13 @@ public class ConstraintsUtil {
 
     public static final String[] APPLICATION_SUPER_ADMIN_ACCESSIBLE_URL= new String[]{
             APPLICATION_BASE_URL+"/activateDeactivate", // activate/deactivate the user
-            SALON_SERVICE+"/salons", // manage salons
+            //SALON_SERVICE+"/salons", // manage salons
             STAFF_SERVICE+"/staffs", // manage all staffs
 
     };
     public static final String[] APPLICATION_ADMIN_ACCESSIBLE_URL= new String[]{
             APPLICATION_BASE_URL+"/",
-            SALON_SERVICE+"/salons", // create,update, salons
-            SALON_SERVICE+"/salons/**", // view salon
-            STAFF_SERVICE+"/staffs", // create, update staffs
-            STAFF_SERVICE+"/salons/**/staffs", // view all staffs in a salon
-            STAFF_SERVICE+"/salons/**/available/staffs", // view all available staffs in a salon
+
 
     };
     public static final String[] APPLICATION_STAFF_ACCESSIBLE_URL= new String[]{
